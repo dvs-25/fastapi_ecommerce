@@ -11,7 +11,6 @@ app.include_router(categories.router)
 app.include_router(products.router)
 
 
-
 @app.get("/")
 async def root():
     """
