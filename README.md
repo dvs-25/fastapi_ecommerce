@@ -39,7 +39,7 @@ pip install -r requirements.txt
 ## Run server
 
 ```shell
-uvicorn main:app --reload
+uvicorn app.main:app --reload
 ```
 
 
