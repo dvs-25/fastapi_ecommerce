@@ -36,13 +36,19 @@ Once the virtual environment is activated, install the project dependencies list
 pip install -r requirements.txt
 ```
 
+## Create Database
+
+```bash
+alembic upgrade head
+```
+
 ## Run server
 
-```shell
+```bash
 uvicorn app.main:app --reload
 ```
 
 
 
 - By default, services will be available at: http://localhost:8000
-- Docs -  http://localhost:8000/docs
+- Swagger -  http://localhost:8000/docs
