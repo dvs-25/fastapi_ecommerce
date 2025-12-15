@@ -1,6 +1,8 @@
 # fastapi_ecommerce
 
-### Clone the Repository
+Python 3.12
+
+## Clone the Repository
 
 To get started, clone the project repository using Git:
 
