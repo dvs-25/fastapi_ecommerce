@@ -4,6 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.products import Product as ProductModel
 from app.models.categories import Category as CategoryModel
+from app.models.users import User as UserModel
+from app.auth import get_current_seller
 from app.schemas import Product as ProductSchema, ProductCreate
 from app.db_depends import get_async_db
 
@@ -46,13 +48,17 @@ async def get_all_products(db: AsyncSession = Depends(get_async_db)):
 
 
 @router.post("/", response_model=ProductSchema, status_code=status.HTTP_201_CREATED)
-async def create_product(product: ProductCreate, db: AsyncSession = Depends(get_async_db)):
+async def create_product(
+    product: ProductCreate,
+    db: AsyncSession = Depends(get_async_db),
+    current_user: UserModel = Depends(get_current_seller),
+):
     """
     Создаёт новый товар.
     """
     await validate_category(db, product.category_id)
 
-    db_product = ProductModel(**product.model_dump())
+    db_product = ProductModel(**product.model_dump(), seller_id=current_user.id)
     db.add(db_product)
     await db.commit()
     await db.refresh(db_product)
@@ -82,11 +88,18 @@ async def get_product(product_id: int, db: AsyncSession = Depends(get_async_db))
 
 
 @router.put("/{product_id}", response_model=ProductSchema)
-async def update_product(product_id: int, product: ProductCreate, db: AsyncSession = Depends(get_async_db)):
+async def update_product(
+    product_id: int,
+    product: ProductCreate,
+    db: AsyncSession = Depends(get_async_db),
+    current_user: UserModel = Depends(get_current_seller),
+):
     """
     Обновляет товар по его ID.
     """
     db_product = await get_product_or_404(db, product_id)
+    if db_product.seller_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You can only update your own products")
     await validate_category(db, product.category_id)
 
     await db.execute(update(ProductModel).where(ProductModel.id == product_id).values(**product.model_dump()))
@@ -96,12 +109,16 @@ async def update_product(product_id: int, product: ProductCreate, db: AsyncSessi
 
 
 @router.delete("/{product_id}")
-async def delete_product(product_id: int, db: AsyncSession = Depends(get_async_db)):
+async def delete_product(
+    product_id: int, db: AsyncSession = Depends(get_async_db), current_user: UserModel = Depends(get_current_seller)
+):
     """
     Удаляет товар по его ID.
     """
     product = await get_product_or_404(db, product_id)
+    if product.seller_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You can only delete your own products")
     product.is_active = False
     await db.commit()
-
+    await db.refresh(product)
     return product

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, EmailStr, SecretStr
 from decimal import Decimal
 
 
@@ -58,3 +58,39 @@ class Product(ProductCreate):
     is_active: bool = Field(..., description="Активность товара")
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserCreate(BaseModel):
+    """
+    Модель для создания пользователя.
+    Используется в POST запросах.
+    """
+
+    email: EmailStr = Field(..., description="Email пользователя")
+    password: SecretStr = Field(..., min_length=8, description="Пароль (минимум 8 символов)")
+    role: str = Field(
+        default="buyer", pattern="^(buyer|seller|admin)$", description="Роль: 'buyer' или 'seller' или 'admin'"
+    )
+
+
+class User(BaseModel):
+    """
+    Модель для ответа с данными пользователя.
+    Используется в GET запросах.
+    """
+
+    id: int = Field(..., description="Уникальный идентификатор пользователя")
+    email: EmailStr = Field(..., description="Email пользователя")
+    is_active: bool = Field(..., description="Статус активности пользователя")
+    role: str = Field(..., description="Роль пользователя")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RefreshTokenRequest(BaseModel):
+    """
+    Модель для запроса обновления токенов.
+    Используется для передачи refresh-токена в эндпоинты обновления токенов.
+    """
+
+    refresh_token: str = Field(..., description="Refresh-токен для обновления токена")
