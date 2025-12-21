@@ -5,8 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.products import Product as ProductModel
 from app.models.categories import Category as CategoryModel
 from app.models.users import User as UserModel
+from app.models.reviews import Review as ReviewModel
 from app.auth import get_current_seller
-from app.schemas import Product as ProductSchema, ProductCreate
+from app.schemas import Product as ProductSchema, ProductCreate, Review as ReviewSchema
 from app.db_depends import get_async_db
 
 
@@ -122,3 +123,16 @@ async def delete_product(
     await db.commit()
     await db.refresh(product)
     return product
+
+
+@router.get("/{product_id}/reviews/", response_model=list[ReviewSchema])
+async def get_reviews_by_product_id(product_id: int, db: AsyncSession = Depends(get_async_db)):
+    """
+    Возвращает список отзывов по ID товара.
+    """
+    product = await get_product_or_404(db, product_id)
+
+    stmt = select(ReviewModel).where(ReviewModel.product_id == product_id, ReviewModel.is_active.is_(True))
+    result = await db.scalars(stmt)
+    reviews = result.all()
+    return reviews
