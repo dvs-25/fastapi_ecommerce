@@ -1,5 +1,7 @@
 import asyncio
 from logging.config import fileConfig
+import sys
+import os
 
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
@@ -7,12 +9,20 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
+
+# Add the parent directory to the path so we can import app modules
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
 from app.database import Base
 from app import models
+from app.config import POSTGRES_URL
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+# Set the sqlalchemy URL from our config
+config.set_main_option('sqlalchemy.url', POSTGRES_URL)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

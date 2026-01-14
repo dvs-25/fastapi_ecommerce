@@ -27,6 +27,7 @@ async def get_review_or_404(db: AsyncSession, review_id: int) -> ReviewModel:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Review not found")
     return review
 
+
 async def get_product_or_404(db: AsyncSession, product_id: int) -> ProductModel:
     """Получает активный товар по ID или вызывает 404 исключение."""
     stmt = select(ProductModel).where(ProductModel.id == product_id, ProductModel.is_active.is_(True))
@@ -35,6 +36,7 @@ async def get_product_or_404(db: AsyncSession, product_id: int) -> ProductModel:
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
     return product
+
 
 async def update_product_rating(db: AsyncSession, product_id: int):
     """
