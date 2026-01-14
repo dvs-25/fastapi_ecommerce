@@ -1,4 +1,5 @@
-from pydantic import BaseModel, Field, ConfigDict
+from datetime import datetime
+from pydantic import BaseModel, Field, ConfigDict, EmailStr, SecretStr
 from decimal import Decimal
 
 
@@ -56,5 +57,67 @@ class Product(ProductCreate):
 
     id: int = Field(..., description="Уникальный идентификатор товара")
     is_active: bool = Field(..., description="Активность товара")
+    rating: float = Field(0.0, description="Рейтинг товара (от 0 до 5)")
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserCreate(BaseModel):
+    """
+    Модель для создания пользователя.
+    Используется в POST запросах.
+    """
+
+    email: EmailStr = Field(..., description="Email пользователя")
+    password: SecretStr = Field(..., min_length=8, description="Пароль (минимум 8 символов)")
+    role: str = Field(
+        default="buyer", pattern="^(buyer|seller|admin)$", description="Роль: 'buyer' или 'seller' или 'admin'"
+    )
+
+
+class User(BaseModel):
+    """
+    Модель для ответа с данными пользователя.
+    Используется в GET запросах.
+    """
+
+    id: int = Field(..., description="Уникальный идентификатор пользователя")
+    email: EmailStr = Field(..., description="Email пользователя")
+    is_active: bool = Field(..., description="Статус активности пользователя")
+    role: str = Field(..., description="Роль пользователя")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ReviewCreate(BaseModel):
+    """
+    Модель для создания и обновления отзыва.
+    Используется в POST и PUT запросах.
+    """
+
+    product_id: int = Field(..., description="ID товара, к которому относится отзыв")
+    comment: str | None = Field(None, max_length=1000, description="Текст отзыва (до 1000 символов)")
+    grade: int = Field(..., ge=1, le=5, description="Оценка товара (от 1 до 5)")
+
+
+class Review(ReviewCreate):
+    """
+    Модель для ответа с данными отзыва.
+    Используется в GET-запросах.
+    """
+
+    id: int = Field(..., description="Уникальный идентификатор отзыва")
+    user_id: int = Field(..., description="ID пользователя, оставившего отзыв")
+    comment_date: datetime = Field(..., description="Дата и время добавления отзыва")
+    is_active: bool = Field(..., description="Активность отзыва")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RefreshTokenRequest(BaseModel):
+    """
+    Модель для запроса обновления токенов.
+    Используется для передачи refresh-токена в эндпоинты обновления токенов.
+    """
+
+    refresh_token: str = Field(..., description="Refresh-токен для обновления токена")

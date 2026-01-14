@@ -1,0 +1,26 @@
+# Виртуальные окружения
+.venv/
+venv/
+
+# Кэш и артефакты Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.mypy_cache/
+.pytest_cache/
+build/
+dist/
+
+
+# Системные файлы и временные файлы
+.git/
+.gitignore
+*.log
+*.tmp
+
+# Конфигурационные файлы Docker
+docker-compose.yml
+Dockerfile
+
+.continue/
