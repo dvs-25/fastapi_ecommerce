@@ -11,6 +11,16 @@ git clone https://github.com/dvs-25/fastapi_ecommerce.git
 cd fastapi_ecommerce
 ```
 
+## Set Up Environment Variables
+
+Create a `.env` file from the provided example:
+
+```bash
+cp .env.example .env
+```
+
+Then edit the `.env` file to customize the values as needed, particularly the `POSTGRES_PASSWORD` and `SECRET_KEY` for security reasons.
+
 ## Running with Docker Compose
 
 The easiest way to run this application is with Docker Compose:
